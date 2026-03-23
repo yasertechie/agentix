@@ -5,33 +5,36 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
+import Chat from "./pages/Chat";
+import Tasks from "./pages/Tasks";
+import Calendar from "./pages/Calendar";
+import Reminders from "./pages/Reminders";
+import AuditLog from "./pages/AuditLog";
+import Settings from "./pages/Settings";
 
 function Router() {
-  // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
+      <Route path="/" component={Home} />
+      <Route path="/chat" component={Chat} />
+      <Route path="/chat/:conversationId" component={Chat} />
+      <Route path="/tasks" component={Tasks} />
+      <Route path="/calendar" component={Calendar} />
+      <Route path="/reminders" component={Reminders} />
+      <Route path="/audit" component={AuditLog} />
+      <Route path="/settings" component={Settings} />
+      <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>
   );
 }
 
-// NOTE: About Theme
-// - First choose a default theme according to your design style (dark or light bg), than change color palette in index.css
-//   to keep consistent foreground/background color across components
-// - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
-
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider
-        defaultTheme="light"
-        // switchable
-      >
+      <ThemeProvider defaultTheme="dark">
         <TooltipProvider>
-          <Toaster />
+          <Toaster theme="dark" position="top-right" />
           <Router />
         </TooltipProvider>
       </ThemeProvider>
