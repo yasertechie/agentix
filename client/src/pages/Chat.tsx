@@ -182,8 +182,8 @@ export default function Chat() {
           ) : (
             <>
               {/* Messages */}
-              <ScrollArea className="flex-1 p-4">
-                <div className="max-w-3xl mx-auto space-y-4 pb-4">
+              <ScrollArea className="flex-1 overflow-hidden">
+                <div className="max-w-3xl mx-auto space-y-4 p-4 pb-4">
                   {messages.length === 0 && (
                     <div className="text-center py-12 text-muted-foreground">
                       <Bot className="h-12 w-12 mx-auto mb-3 opacity-30" />
@@ -267,18 +267,18 @@ function MessageBubble({ message }: { message: any }) {
           <Bot className="h-4 w-4 text-muted-foreground" />
         )}
       </div>
-      <div className={`flex flex-col gap-1 max-w-[80%] ${isUser ? "items-end" : "items-start"}`}>
+        <div className={`flex flex-col gap-1 max-w-[85%] min-w-0 ${isUser ? "items-end" : "items-start"}`}>
         <div
-          className={`px-4 py-3 rounded-2xl text-sm leading-relaxed ${
+          className={`px-4 py-3 rounded-2xl text-sm leading-relaxed break-words overflow-hidden ${
             isUser
               ? "bg-primary text-primary-foreground rounded-tr-sm"
               : "bg-card border border-border/50 text-card-foreground rounded-tl-sm"
           }`}
         >
           {isUser ? (
-            <p className="whitespace-pre-wrap">{message.content}</p>
+            <p className="whitespace-pre-wrap break-words">{message.content}</p>
           ) : (
-            <div className="prose prose-sm prose-invert max-w-none">
+            <div className="prose prose-sm prose-invert max-w-none overflow-x-auto">
               <Streamdown>{message.content}</Streamdown>
             </div>
           )}

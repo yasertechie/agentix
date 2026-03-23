@@ -54,3 +54,4 @@
 
 ## Bugfixes
 - [x] Fixed reminder notifications: increased polling from 30s to 5s, added toast popups for triggered reminders, added Web Audio API sound alerts
+- [x] Fixed chat message overflow: increased max-width to 85%, added break-words and overflow-x-auto, fixed ScrollArea overflow-hidden
