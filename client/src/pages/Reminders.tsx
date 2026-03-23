@@ -10,8 +10,45 @@ import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
 import { format, isPast } from "date-fns";
 import { Bell, BellOff, Clock, Plus, RefreshCw, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
+
+interface Reminder {
+  id: number;
+  title: string;
+  message?: string | null;
+  status: "pending" | "triggered" | "dismissed" | "snoozed";
+  triggerAt: Date;
+  repeat: string;
+  userId: number;
+  snoozeUntil?: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Play a simple notification sound
+function playNotificationSound() {
+  try {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    oscillator.frequency.value = 800; // Hz
+    oscillator.type = "sine";
+
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.5);
+  } catch (err) {
+    // Fallback: use browser beep if Web Audio API fails
+    console.log("Reminder triggered (audio unavailable)");
+  }
+}
 
 const STATUS_STYLES = {
   pending: "bg-blue-500/20 text-blue-400",
@@ -24,9 +61,42 @@ export default function Reminders() {
   const [showCreate, setShowCreate] = useState(false);
   const utils = trpc.useUtils();
 
-  const { data: reminders = [], isLoading } = trpc.reminders.list.useQuery(undefined, {
-    refetchInterval: 30000,
+  const { data: reminders = [], isLoading, refetch } = trpc.reminders.list.useQuery(undefined, {
+    refetchInterval: 5000, // Poll every 5 seconds for triggered reminders
   });
+
+  const prevRemindersRef = useRef<typeof reminders>(reminders);
+
+  // Show toast notification when a reminder is triggered
+  useEffect(() => {
+    if (!reminders || !prevRemindersRef.current) {
+      prevRemindersRef.current = reminders;
+      return;
+    }
+
+    const newlyTriggered = reminders.filter((r) => {
+      const wasTriggered = prevRemindersRef.current?.some(
+        (prev) => prev.id === r.id && prev.status === "triggered"
+      );
+      return r.status === "triggered" && !wasTriggered;
+    });
+
+    newlyTriggered.forEach((reminder) => {
+      // Show toast notification
+      toast.success(
+        <div className="flex flex-col gap-1">
+          <p className="font-semibold">⏰ {reminder.title}</p>
+          <p className="text-sm text-muted-foreground">{reminder.message || "Time to act!"}</p>
+        </div>,
+        { duration: 10000 }
+      );
+
+      // Play notification sound
+      playNotificationSound();
+    });
+
+    prevRemindersRef.current = reminders;
+  }, [reminders]);
 
   const updateReminder = trpc.reminders.update.useMutation({
     onSuccess: () => utils.reminders.list.invalidate(),

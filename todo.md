@@ -50,3 +50,7 @@
 - [x] Tool wrapper documentation
 - [x] Database schema documentation
 - [x] Deployment guide (Manus, Docker, Vercel/Railway)
+
+
+## Bugfixes
+- [x] Fixed reminder notifications: increased polling from 30s to 5s, added toast popups for triggered reminders, added Web Audio API sound alerts
